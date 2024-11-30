@@ -2,23 +2,33 @@ const express = require("express");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 const app = express();
-const productRoutes = require('./routes/index'); // Import routes from index.js
+
+// Import routes
+const productRoutes = require('./routes/index'); // Main product routes
+const adminRoutes = require('./routes/admin'); // Admin routes
 
 // Set up EJS as the view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Serve static files
+// Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware to log errors and handle static files
+// Middleware to parse incoming JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/', productRoutes); // Delegate routing to index.js
+// Mount routes
+app.use('/', productRoutes); // Main product routes
+app.use('/admin', adminRoutes); // Admin routes
+
+// Error handling middleware for undefined routes
+app.use((req, res, next) => {
+  res.status(404).render('error', { message: 'Page not found' }); // Render an error view if available
+});
 
 // Start the server
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:3000`);
 });
